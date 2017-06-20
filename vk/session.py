@@ -18,11 +18,13 @@ class Session(object):
 
     CAPTCHA_URI = 'https://m.vk.com/captcha.php'
 
-    def __init__(self, user_login='', user_password='', app_id='', scope='offline', access_token='', timeout=10,
+    def __init__(self, user_login='', user_password='', app_id='', scope='offline', access_token='',
+                 timeout=10, api_version='5.65', proxies=None,
                  **method_default_args):
 
         self.user_login = user_login
         self.user_password = user_password
+        self.api_version = api_version
         self.app_id = app_id
         self.scope = scope
 
@@ -33,6 +35,7 @@ class Session(object):
         self.auth_session = requests.Session()
         # self.requests_session = LoggingSession()
         self.requests_session = requests.Session()
+        self.requests_session.proxies = proxies
         self.requests_session.headers['Accept'] = 'application/json'
         self.requests_session.headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
@@ -165,8 +168,6 @@ class Session(object):
                     raise error
 
     def send_api_request(self, request, captcha_response=None):
-        assert 'v' in self.method_default_args or 'v' in request._method_args, 'vk.com API version is required'
-
         url = self.API_URL + request._method_name
         method_args = self.method_default_args.copy()
         method_args.update(stringify_values(request._method_args))
